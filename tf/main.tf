@@ -45,7 +45,7 @@ resource "github_repository_deploy_key" "this" {
 
 provider "flux" {
   kubernetes = {
-    config_path   = "~/.kube/config"
+    config_path = "~/.kube/config"
   }
   git = {
     url = "ssh://git@github.com/${var.github_org}/${var.github_repository}.git"
@@ -60,4 +60,16 @@ resource "flux_bootstrap_git" "this" {
   depends_on = [github_repository_deploy_key.this]
 
   path = "flux"
+}
+
+data "flux_install" "main" {
+  target_path    = "flux/cluster"
+  network_policy = false
+  version        = "latest"
+}
+
+data "flux_sync" "main" {
+  target_path = "flux/cluster"
+  url         = "https://github.com/${var.github_org}/${var.github_repository}"
+  branch      = "main"
 }
